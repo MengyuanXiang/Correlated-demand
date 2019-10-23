@@ -24,7 +24,7 @@ import umontreal.iro.lecuyer.stat.Tally;
 
 public class Simulator {
 	
-	public static double[][] calculateCovariance(double [] ExpDemand, double cv, double rho){
+	public static double[][] calculateCovariance(double [] ExpDemand, double cv, double [] rho){
 		double [] stdDemand =new double [ExpDemand.length];
 		for (int i = 0; i < ExpDemand.length; i ++) {
 			stdDemand[i] = cv*ExpDemand[i];
@@ -32,7 +32,7 @@ public class Simulator {
 		
 		double [][] covariance = new double [ExpDemand.length][ExpDemand.length];
 		
-		
+		/*
 		for (int row=0; row<covariance.length;row++) {
 			for (int col=0; col<covariance[row].length;col++) {
 				if (row==col) {
@@ -43,8 +43,8 @@ public class Simulator {
 					covariance[row][col]=0;
 				}
 			}
-		}
-		/*
+		}*/
+		
 		//number of correlation is n
 		for (int row=0; row<covariance.length;row++) {
 			covariance[row][row]=stdDemand[row]*stdDemand[row];
@@ -59,7 +59,6 @@ public class Simulator {
 				}
 			}
 		}
-		*/
 		return covariance;		
 	}
 	
@@ -125,7 +124,7 @@ public class Simulator {
 										   double unitcost,
 										   double[] expDemand,
 										   double cv,
-										   double rho,
+										   double [] rho,
 										   int Nbpartitions){
 		double[] previousRealizations = new double[t];
 		System.arraycopy(realizations, 0, previousRealizations, 0, t);
@@ -191,7 +190,7 @@ public class Simulator {
 			   double unitcost,
 			   double[] expDemand,
 			   double cv,
-			   double rho,
+			   double[] rho,
 			   int Nbpartitions) {
 		double etc = 0;
 		for(int t = 0; t < realizations.length; t++) {
@@ -214,6 +213,71 @@ public class Simulator {
 		return etc;
 	}
 
+	/*
+	public static void main(String[] args) throws FileNotFoundException {
+		double penaltycost = 10 ;
+		double unitcost = 0;
+		double ordercost = 100;
+		double[] expDemand = {5,8,24,39,16,29,51,39,75,69,26,20,32,11,19};
+		double holdingcost = 1;
+		double initialStock = 0;
+		int Nbpartitions = 10;
+		
+		double cv = 0.1;
+		double rho = 0.5;
+		
+		
+		String fileName="/Users/mengyuanxiang/Downloads/myFile32.txt";
+		
+		File textFile = new File(fileName);
+		
+		Scanner in = new Scanner(textFile);
+		
+		int rows = 5000;//number of simulations
+		int columns = 15;//number of time perios
+		double[][] realizations = new double [rows][columns];
+		
+		while(in.hasNextLine()) {
+			for (int i=0; i<realizations.length;i++) {
+				String[] line = in.nextLine().trim().split(" ");
+				for (int j=0;j<line.length;j++) {
+					realizations[i][j]=Double.parseDouble(line[j]);
+					
+				}
+			}
+			//String line = in.nextLine();
+			//System.out.println(line);
+			
+		}
+		//System.out.println(Arrays.toString(realizations));
+		in.close();*/
+
+		/*
+		double[][] realizations = {
+				{14.8390050967702,19.1946573050903,10.8685800582842,14.1260021324616,16.3334884846290,28.0399277361043,17.4013636163451,51.5622851073546},
+				{10.6470943209089,20.9752720362035,12.6841375336190,11.4111973550090,17.0291562340996,30.6709684851637,16.1195622474581,52.4440377413956},
+				{13.3790442329951,19.6703767978565,10.1858678943706,10.1613882338950,19.4695962446614,37.5198618262082,18.1243971842410,46.1534503026573},
+				{10.3017615885902,15.0023167265418,10.7992738466370,10.8204497563823,20.8604147177837,28.0641911222693,16.0897395844909,59.0349021312539},
+				{10.5488915698347,13.1496738060104,9.36289107505558,10.8381733603603,17.4128902947308,37.7552301114486,20.8337091381797,55.8344712550846}	
+		};
+		*/
+/*
+		double[] results = new double[realizations.length];
+		for(int i = 0; i< realizations.length; i++) {
+			double etc = simulateOneRun(realizations[i], initialStock, ordercost, holdingcost,
+				penaltycost, unitcost, expDemand, cv, rho, Nbpartitions);
+			results[i] = etc;
+		}
+		
+		double totalcost=0;
+		for(int j =0; j<results.length;j++) {
+			totalcost += results[j];
+		}
+		//System.out.println(Arrays.toString(results));
+		System.out.println(totalcost);
+		System.out.println(totalcost/results.length);
+	}
+	*/
 	
 	
 	public static double[] multinormalPointGeneration(int N, double [] mu, double [][] sigma) {
@@ -231,7 +295,7 @@ public class Simulator {
 		int counter=0;
 		File file = new File("results.txt");
 		
-		double errorThreshold = 0.003;
+		double errorThreshold = 0.005;
 		double confidenceProbability = 0.95;
 
 		
@@ -239,22 +303,30 @@ public class Simulator {
 			java.text.NumberFormat format = new java.text.DecimalFormat("0.01");
 			PrintWriter pw = new PrintWriter(new FileWriter(file));
 
-			double[] orderCostArray = { 500, 1500 };
-			double[] penaltyCostArray = {5, 10};
-			double[] cvArray = {0.1, 0.2};
-			double[] rhoArray = { -0.75, -0.25, 0.25, 0.75 };
+			double[] penaltyCostArray = {10};
+			double[] unitCostArray = {0};
+			//double[] orderCostArray = { 200, 300 };
+			//double[] rhoArray = { 0.25, 0.5 };
+			// double[] cvArray = {0.15,0.3};
 
-			for (int rh = 0; rh < rhoArray.length; rh++) {
-				double rho = rhoArray[rh];
-			for (int o = 0; o < orderCostArray.length; o++) {
-				double ordercost = orderCostArray[o];
-			for (int p = 0; p < penaltyCostArray.length; p++) {
-				double penaltycost = penaltyCostArray[p];
-			for (int c = 0; c < cvArray.length; rh++) {
-				double cv = rhoArray[c];
+			//for (int rh = 0; rh < rhoArray.length; rh++) {
+				//double rho = rhoArray[rh];
 
-							double[] expDemand = {105	46	17	40	1	38	55	58	112	11	24	68	7	106	43	43	90	19	25	37	98	39	123	2};
-							double unitcost = 0;
+				//for (int o = 0; o < orderCostArray.length; o++) {
+					//double ordercost = orderCostArray[o];
+
+					for (int u = 0; u < unitCostArray.length; u++) {
+						double unitcost = unitCostArray[u];
+
+						for (int p = 0; p < penaltyCostArray.length; p++) {
+
+							double penaltycost = penaltyCostArray[p];
+
+							double cv = 0.2;
+							double [] rho = {0.5};
+							double ordercost = 100;
+
+							double[] expDemand = {5,8,24,39,16,29,51,39}; 
 							double holdingcost = 1;
 							double initialStock = 0;
 							int Nbpartitions = 10;
@@ -276,16 +348,18 @@ public class Simulator {
 								
 								tally.add(etc);
 								
-								
+								System.out.print(".");
 								if(r >= 20) {
 									double[] centerAndRadius = new double[2];
 									tally.confidenceIntervalStudent(confidenceProbability, centerAndRadius);
-									if(r%100==0) {
+									if(r%10==0) {
 										System.out.println(tally.report());
 										System.out.println("Current error: "+centerAndRadius[1]/centerAndRadius[0]);
 									}
-									if(centerAndRadius[1]/centerAndRadius[0] <= errorThreshold) 
+									if(centerAndRadius[1]/centerAndRadius[0] <= errorThreshold) {
 										stop = true;
+										System.out.println(r);
+									}
 								}
 							}
 
@@ -299,8 +373,8 @@ public class Simulator {
 						}
 					}
 				
-				}
-			}
+				//}
+			//}
 			pw.close();
 
 		} catch (IOException e) {
