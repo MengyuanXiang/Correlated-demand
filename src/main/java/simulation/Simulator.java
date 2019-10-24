@@ -24,7 +24,7 @@ import umontreal.iro.lecuyer.stat.Tally;
 
 public class Simulator {
 	
-	public static double[][] calculateCovariance(double [] ExpDemand, double cv, double [] rho){
+	public static double[][] calculateCovariance(double [] ExpDemand, double cv, double rho){
 		double [] stdDemand =new double [ExpDemand.length];
 		for (int i = 0; i < ExpDemand.length; i ++) {
 			stdDemand[i] = cv*ExpDemand[i];
@@ -32,7 +32,7 @@ public class Simulator {
 		
 		double [][] covariance = new double [ExpDemand.length][ExpDemand.length];
 		
-		/*
+		
 		for (int row=0; row<covariance.length;row++) {
 			for (int col=0; col<covariance[row].length;col++) {
 				if (row==col) {
@@ -43,8 +43,9 @@ public class Simulator {
 					covariance[row][col]=0;
 				}
 			}
-		}*/
+		}
 		
+		/*
 		//number of correlation is n
 		for (int row=0; row<covariance.length;row++) {
 			covariance[row][row]=stdDemand[row]*stdDemand[row];
@@ -58,7 +59,8 @@ public class Simulator {
 					covariance[row][row-nbcorrelation-1]=rho[nbcorrelation]*stdDemand[row]*stdDemand[row-nbcorrelation-1];
 				}
 			}
-		}
+		}*/
+		
 		return covariance;		
 	}
 	
@@ -124,7 +126,7 @@ public class Simulator {
 										   double unitcost,
 										   double[] expDemand,
 										   double cv,
-										   double [] rho,
+										   double rho,
 										   int Nbpartitions){
 		double[] previousRealizations = new double[t];
 		System.arraycopy(realizations, 0, previousRealizations, 0, t);
@@ -190,7 +192,7 @@ public class Simulator {
 			   double unitcost,
 			   double[] expDemand,
 			   double cv,
-			   double[] rho,
+			   double rho,
 			   int Nbpartitions) {
 		double etc = 0;
 		for(int t = 0; t < realizations.length; t++) {
@@ -303,30 +305,27 @@ public class Simulator {
 			java.text.NumberFormat format = new java.text.DecimalFormat("0.01");
 			PrintWriter pw = new PrintWriter(new FileWriter(file));
 
-			double[] penaltyCostArray = {10};
-			double[] unitCostArray = {0};
-			//double[] orderCostArray = { 200, 300 };
-			//double[] rhoArray = { 0.25, 0.5 };
-			// double[] cvArray = {0.15,0.3};
+			double[] penaltyCostArray = {5,10};
+			double[] orderCostArray = { 200, 400 };
+			double[] rhoArray = { -0.5,-0.25,0.25, 0.5 };
+			double[] cvArray = {0.1,0.2};
 
-			//for (int rh = 0; rh < rhoArray.length; rh++) {
-				//double rho = rhoArray[rh];
+			for (int rh = 0; rh < rhoArray.length; rh++) {
+				double rho = rhoArray[rh];
 
-				//for (int o = 0; o < orderCostArray.length; o++) {
-					//double ordercost = orderCostArray[o];
-
-					for (int u = 0; u < unitCostArray.length; u++) {
-						double unitcost = unitCostArray[u];
+				for (int o = 0; o < orderCostArray.length; o++) {
+					double ordercost = orderCostArray[o];
 
 						for (int p = 0; p < penaltyCostArray.length; p++) {
+                      	    double penaltycost = penaltyCostArray[p];
+                      	    
+                      	    for (int c = 0; c< cvArray.length; c++) {
+                      	    	double cv = cvArray[c];
+                      	  
 
-							double penaltycost = penaltyCostArray[p];
 
-							double cv = 0.2;
-							double [] rho = {0.5};
-							double ordercost = 100;
-
-							double[] expDemand = {5,8,24,39,16,29,51,39}; 
+							double[] expDemand = {105,46,17,40,22,38,55,58,112,11,24,68,7,104,43}; 
+							double unitcost =0;
 							double holdingcost = 1;
 							double initialStock = 0;
 							int Nbpartitions = 10;
@@ -371,10 +370,11 @@ public class Simulator {
 							pw.println(format.format(tally.average()));
 							
 						}
+						
 					}
 				
-				//}
-			//}
+				}
+			}
 			pw.close();
 
 		} catch (IOException e) {
